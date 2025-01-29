@@ -1,0 +1,10 @@
+# Unreal Engine .gitignore
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Build/
+*.sln
+*.suo
+*.xcodeproj
+*.xcworkspace
