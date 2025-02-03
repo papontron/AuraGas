@@ -21,6 +21,10 @@ void AAuraCharacterBase::BeginPlay()
 	
 }
 
+void AAuraCharacterBase::InitAbilityActorInfo()
+{
+}
+
 USkeletalMeshComponent* AAuraCharacterBase::GetWeapon()
 {
 	return Weapon;

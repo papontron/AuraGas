@@ -36,7 +36,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Category="Setup")
 	UAbilitySystemComponent* AbilitySystemComponent;
 	UPROPERTY(BlueprintReadWrite, Category="Setup")
-	UAttributeSet* AttributeSet; 
+	UAttributeSet* AttributeSet;
+
+	virtual void InitAbilityActorInfo();
 };
 
  

@@ -22,7 +22,7 @@ protected:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
 
-	void InitializeActorInfo();
+	virtual void InitAbilityActorInfo() override;
 	
 	UPROPERTY(EditAnywhere,Category="Setup")
 	TObjectPtr<UCameraComponent> Camera;

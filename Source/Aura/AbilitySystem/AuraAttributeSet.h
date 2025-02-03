@@ -15,6 +15,20 @@
 /**
  * 
  */
+
+struct FGameplayEffectData
+{
+	UAbilitySystemComponent* AbilitySystemComponent;
+	AActor* AvatarActor;
+	ACharacter* Character;
+	AController* Controller;
+};
+struct FEffectProperties
+{
+	FGameplayEffectContextHandle ContextHandle;
+	FGameplayEffectData SourceData;
+	FGameplayEffectData TargetData;
+};
 UCLASS()
 class AURA_API UAuraAttributeSet : public UAttributeSet
 {
@@ -22,7 +36,10 @@ class AURA_API UAuraAttributeSet : public UAttributeSet
 public:
 	UAuraAttributeSet();
 	virtual void GetLifetimeReplicatedProps(TArray< class FLifetimeProperty >& OutLifetimeProps) const override;
+	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
+	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
 
+	
 	//Health
 	UPROPERTY(BlueprintReadOnly,ReplicatedUsing=OnRep_Health, Category="VitalAttributes")
 	FGameplayAttributeData Health;
@@ -59,6 +76,11 @@ public:
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, MaxStamina);
 	UFUNCTION()
 	void OnRep_MaxStamina(const FGameplayAttributeData& OldMaxStamina) const;
+
+protected:
+	void SetEffectProperties(const FGameplayEffectModCallbackData &Data, FEffectProperties& EffectProperties);
 };
+
+
 
 

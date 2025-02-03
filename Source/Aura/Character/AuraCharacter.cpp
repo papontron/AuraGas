@@ -4,10 +4,12 @@
 #include "AuraCharacter.h"
 
 #include "AbilitySystemComponent.h"
+#include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/Player/AuraPlayerController.h"
 #include "Aura/Player/AuraPlayerState.h"
 #include "Aura/UI/HUD/AuraHUD.h"
 #include "Aura/UI/Widget/AuraUserWidget.h"
+#include "Aura/UI/WidgetController/OverlayWidgetController.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -64,8 +66,9 @@ void AAuraCharacter::BeginPlay()
 void AAuraCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-	InitializeActorInfo();
-	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
+	InitAbilityActorInfo();
+	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
+	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(NewController))
 	{
 		//since the player controller is only valid for the locally controlled pawn(multiplayer game)
 		AAuraPlayerState* AuraPlayerState = AuraPlayerController->GetPlayerState<AAuraPlayerState>();
@@ -84,16 +87,16 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 void AAuraCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
-	InitializeActorInfo();
+	InitAbilityActorInfo();
+	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 }
 
 
-void AAuraCharacter::InitializeActorInfo()
+void AAuraCharacter::InitAbilityActorInfo()
 {
 	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
 	checkf(AuraPlayerState,TEXT("Player state is null"));
 	AuraPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(AuraPlayerState,this);
 	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
 	AttributeSet = AuraPlayerState->GetAttributeSet();
-	
 }

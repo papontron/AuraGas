@@ -2,8 +2,6 @@
 
 
 #include "AuraPlayerController.h"
-#include "AbilitySystemComponent.h"
-#include "AuraPlayerState.h"
 #include "InputAction.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/Character.h"
@@ -83,14 +81,10 @@ void AAuraPlayerController::HandleMove(const FInputActionValue& InputValue)
 	const FRotator Rotator(0.f,GetControlRotation().Yaw,0.f);
 	const FVector Forward = FRotationMatrix(Rotator).GetUnitAxis(EAxis::Y);
 	const FVector Right = FRotationMatrix(Rotator).GetUnitAxis(EAxis::X);
-	UE_LOG(LogTemp,Display,TEXT("Rotator: %s"), *Rotator.ToString());
-	UE_LOG(LogTemp,Display,TEXT("Forward: %s"), *Forward.ToString());
-	UE_LOG(LogTemp,Display,TEXT("Right: %s"), *Right.ToString());
-	UE_LOG(LogTemp,Display,TEXT("Input Y: %f"), InputAxisVector.Y);
-	UE_LOG(LogTemp, Display, TEXT("Input X:%f"), InputAxisVector.X);
+
 	GetCharacter()->AddMovementInput(Forward, InputAxisVector.Y);
 	GetCharacter()->AddMovementInput(Right, InputAxisVector.X);
-	GEngine->AddOnScreenDebugMessage(-1,5.f,FColor::Magenta,FString::Printf(TEXT("Current velocity: %f"),GetCharacter()->GetCharacterMovement()->Velocity.Length()));
+	
 	
 }
 
@@ -108,8 +102,6 @@ void AAuraPlayerController::HandleMoveToClick()
 	FVector Forward(0.f,1.f,0.f);
 	FVector Right(1.f,0.f,0.f);
 	
-	UE_LOG(LogTemp,Display,TEXT("Direction: %s"), *Direction.ToString());
-	
 	/*
 	AuraCharacter->SetActorRotation((ImpactPoint-ActorLocation).Rotation());
 	AuraCharacter->GetCharacterMovement()->Velocity = Direction*AuraCharacter->GetCharacterMovement()->MaxWalkSpeed;
@@ -121,14 +113,12 @@ void AAuraPlayerController::HandleMoveToClick()
 
 void AAuraPlayerController::StartSprint()
 {
-		GetCharacter()->GetCharacterMovement()->MaxWalkSpeed = 750.f;
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, "Sprinting");	
+	GetCharacter()->GetCharacterMovement()->MaxWalkSpeed = 750.f;
 }
 
 void AAuraPlayerController::StopSprint()
 {
 	GetCharacter()->GetCharacterMovement()->MaxWalkSpeed = 320.f;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, "Stopped Sprinting");	
 }
 
 void AAuraPlayerController::TraceCursor()
