@@ -19,14 +19,16 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void HighlightUnhighlight() override;
-
+	/*Combat Interface*/
+	virtual int32 GetCharacterLevel() override;
+	/*End Combat Interface*/
 	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-
 	virtual void InitAbilityActorInfo() override;
-	
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character Class Defaults")
+	int32 EnemyLevel = 1;
+	
 };

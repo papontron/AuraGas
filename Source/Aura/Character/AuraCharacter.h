@@ -15,7 +15,9 @@ class AURA_API AAuraCharacter : public AAuraCharacterBase
 public:
 	// Sets default values for this character's properties
 	AAuraCharacter();
-
+	/*CombatInterface*/
+	virtual int32 GetCharacterLevel() override;
+	/*End CombatInterface*/
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

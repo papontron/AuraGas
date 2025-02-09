@@ -4,16 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "Aura/Interactive/CombatInterface.h"
 #include "GameFramework/Character.h"
 #include "AuraCharacterBase.generated.h"
 
 
+class UGameplayEffect;
 class USpringArmComponent;
 class UAbilitySystemComponent;
 class UAttributeSet;
 class UCameraComponent;
 UCLASS()
-class AURA_API AAuraCharacterBase : public ACharacter, public IAbilitySystemInterface
+class AURA_API AAuraCharacterBase : public ACharacter, public IAbilitySystemInterface, public ICombatInterface
 {
 	GENERATED_BODY()
 
@@ -23,8 +25,9 @@ public:
 	USkeletalMeshComponent* GetWeapon();
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const;
-	void SetAbilitySystemComponent(UAbilitySystemComponent* AbilitySystemComponent);
-	void SetAttributeSet(UAttributeSet* AttributeSet);
+	void SetAbilitySystemComponent(UAbilitySystemComponent* InAbilitySystemComponent);
+	void SetAttributeSet(UAttributeSet* InAttributeSet);
+
 protected:
 	
 	virtual void BeginPlay() override;
@@ -39,6 +42,25 @@ protected:
 	UAttributeSet* AttributeSet;
 
 	virtual void InitAbilityActorInfo();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="DefaultAttributes")
+	TSubclassOf<UGameplayEffect> DefaultPrimaryAttributes;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="DefaultAttributes")
+	TSubclassOf<UGameplayEffect> DefaultSecondaryAttributes;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="DefaultAttributes")
+	TSubclassOf<UGameplayEffect> DefaultVitalAttributes;
+
+	UFUNCTION()
+	void InitAllAttributes() const;
+	
+	UFUNCTION()
+	void InitPrimaryAttributes() const;
+	UFUNCTION()
+	void InitSecondaryAttributes() const;
+	UFUNCTION()
+	void InitVitalAttributes() const;
+private:
+	void ApplyEffectToSelf(const TSubclassOf<UGameplayEffect> &GameplayEffectClass,const float ActorLevel) const;
 };
 
  

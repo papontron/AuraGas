@@ -8,13 +8,9 @@
 #include "Aura/Player/AuraPlayerController.h"
 #include "Aura/Player/AuraPlayerState.h"
 #include "Aura/UI/HUD/AuraHUD.h"
-#include "Aura/UI/Widget/AuraUserWidget.h"
-#include "Aura/UI/WidgetController/OverlayWidgetController.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Kismet/GameplayStatics.h"
-
 
 // Sets default values
 AAuraCharacter::AAuraCharacter()
@@ -46,9 +42,6 @@ AAuraCharacter::AAuraCharacter()
 	
 	Camera = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	Camera->SetupAttachment(SpringArm);
-
-	
-	
 	
 	FTransform MeshTransform;
 	MeshTransform.SetLocation(FVector(0,0,-80.f));
@@ -56,17 +49,22 @@ AAuraCharacter::AAuraCharacter()
 	GetMesh()->SetWorldTransform(MeshTransform);
 }
 
+int32 AAuraCharacter::GetCharacterLevel()
+{
+	return GetPlayerState<AAuraPlayerState>()->GetPlayerLevel();
+}
+
 
 void AAuraCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void AAuraCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 	InitAbilityActorInfo();
+	InitAllAttributes();
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(NewController))
 	{
@@ -75,11 +73,8 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 		if (AAuraHUD* AuraHUD = Cast<AAuraHUD>(AuraPlayerController->GetHUD()))//the hud is only valid for the locally controlled player, not for the other remote controlled players in the multiplayer game
 		{
 			AuraHUD->InitOverlay(AuraPlayerController,AuraPlayerState,AbilitySystemComponent,AttributeSet);
-			
 		}
-
 	}
-	
 }
 
 
@@ -88,6 +83,7 @@ void AAuraCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 	InitAbilityActorInfo();
+	InitAllAttributes();
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 }
 

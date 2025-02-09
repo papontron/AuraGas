@@ -60,6 +60,11 @@ void AAuraEnemy::HighlightUnhighlight()
 	}
 }
 
+int32 AAuraEnemy::GetCharacterLevel()
+{
+	return EnemyLevel;
+}
+
 
 
 

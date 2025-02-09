@@ -3,6 +3,8 @@
 
 #include "AuraCharacterBase.h"
 
+#include "AbilitySystemComponent.h"
+
 // Sets default values
 AAuraCharacterBase::AAuraCharacterBase()
 {
@@ -24,6 +26,7 @@ void AAuraCharacterBase::BeginPlay()
 void AAuraCharacterBase::InitAbilityActorInfo()
 {
 }
+
 
 USkeletalMeshComponent* AAuraCharacterBase::GetWeapon()
 {
@@ -49,3 +52,38 @@ void AAuraCharacterBase::SetAttributeSet(UAttributeSet* InAttributeSet)
 {
 	AttributeSet = InAttributeSet;
 }
+
+void AAuraCharacterBase::InitAllAttributes() const
+{
+	InitPrimaryAttributes();
+	InitSecondaryAttributes();
+	InitVitalAttributes();
+}
+
+void AAuraCharacterBase::InitPrimaryAttributes() const
+{
+	ApplyEffectToSelf(DefaultPrimaryAttributes,1.f);
+}
+
+
+
+void AAuraCharacterBase::InitSecondaryAttributes() const
+{
+	ApplyEffectToSelf(DefaultSecondaryAttributes,1.f);
+}
+
+void AAuraCharacterBase::InitVitalAttributes() const
+{
+	ApplyEffectToSelf(DefaultVitalAttributes,1.f);
+}
+
+void AAuraCharacterBase::ApplyEffectToSelf(const TSubclassOf<UGameplayEffect> &GameplayEffectClass,const float ActorLevel) const
+{
+	checkf(IsValid(GetAbilitySystemComponent()), TEXT("Ability System component isn't valid"));
+	checkf(GameplayEffectClass, TEXT("DefaultPrimaryAttributes GameplayEffect must not be NULL"));
+	FGameplayEffectContextHandle ContextHandle = GetAbilitySystemComponent()->MakeEffectContext();
+	ContextHandle.AddSourceObject(this);
+	const FGameplayEffectSpecHandle SpecHandle = GetAbilitySystemComponent()->MakeOutgoingSpec(GameplayEffectClass,ActorLevel,ContextHandle);
+	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+}
+

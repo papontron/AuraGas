@@ -2,10 +2,6 @@
 
 
 #include "AuraEffectActor.h"
-
-#include <iostream>
-#include <ostream>
-
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 
@@ -35,12 +31,11 @@ void AAuraEffectActor::ApplyEffectToTarget(AActor* TargetActor, TArray<TSubclass
 			const FGameplayEffectSpec GameplayEffectSpec = *GameplayEffectSpecHandle.Data.Get();
 		
 			FActiveGameplayEffectHandle ActiveGameplayEffectHandle = TargetASC->ApplyGameplayEffectSpecToSelf(GameplayEffectSpec);
-			GEngine->AddOnScreenDebugMessage(-1,10.f,FColor::Green,
-				FString::Printf(TEXT("GameplayEffect Added, Source Address: %p"),this));
+			// GEngine->AddOnScreenDebugMessage(-1,10.f,FColor::Green,
+			// 	FString::Printf(TEXT("GameplayEffect Added, Source Address: %p"),this));
 			bool bIsInfinite =GameplayEffectSpecHandle.Data.Get()->Def.Get()->DurationPolicy == EGameplayEffectDurationType::Infinite;
-			if (bIsInfinite&& InfiniteEffectRemovalPolicy==EEffectRemovalPolicy::RemoveOnEndOverlap)
+			if (bIsInfinite && InfiniteEffectRemovalPolicy==EEffectRemovalPolicy::RemoveOnEndOverlap)
 			{
-				
 				ActiveGameplayEffects.Add(ActiveGameplayEffectHandle);
 			}
 		}
@@ -86,7 +81,7 @@ void AAuraEffectActor::OnEndOverlap(AActor* TargetActor)
 	{
 		ApplyEffectToTarget(TargetActor, InfiniteGameplayEffectClasses);
 	}
-	int* myInt = nullptr;
+	
 	
 	if (InfiniteEffectRemovalPolicy==EEffectRemovalPolicy::RemoveOnEndOverlap)
 	{
@@ -100,14 +95,12 @@ void AAuraEffectActor::OnEndOverlap(AActor* TargetActor)
 				for (auto ActiveGameplayEffect: KeyValuePair.Value)
 				{
 					TargetASC->RemoveActiveGameplayEffect(ActiveGameplayEffect);
-					GEngine->AddOnScreenDebugMessage(-1,10.f,FColor::Green,
-				FString::Printf(TEXT("GameplayEffect Removed, Source Address: %p"),this));
+				// 	GEngine->AddOnScreenDebugMessage(-1,10.f,FColor::Green,
+				// FString::Printf(TEXT("GameplayEffect Removed, Source Address: %p"),this));
 				}
 			}
 		}
-		
 		ActiveGameplayEffectsMap.FindAndRemoveChecked(this);
-		
 	}
 }
 

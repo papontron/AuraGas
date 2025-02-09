@@ -77,7 +77,7 @@ void AAuraPlayerController::Tick(float DeltaTime)
 
 void AAuraPlayerController::HandleMove(const FInputActionValue& InputValue)
 {
-	FVector2D InputAxisVector = InputValue.Get<FVector2D>();
+	const FVector2D InputAxisVector = InputValue.Get<FVector2D>();
 	const FRotator Rotator(0.f,GetControlRotation().Yaw,0.f);
 	const FVector Forward = FRotationMatrix(Rotator).GetUnitAxis(EAxis::Y);
 	const FVector Right = FRotationMatrix(Rotator).GetUnitAxis(EAxis::X);
@@ -95,12 +95,12 @@ void AAuraPlayerController::HandleMoveToClick()
 	GetHitResultUnderCursor(ECC_Visibility,true,HitResult);
 	if (!HitResult.bBlockingHit) return;
 	
-	FVector ImpactPoint = HitResult.ImpactPoint;
-	FVector ActorLocation = AuraCharacter->GetActorLocation();
-	FVector Direction = (ImpactPoint - ActorLocation).GetSafeNormal();
+	const FVector ImpactPoint = HitResult.ImpactPoint;
+	const FVector ActorLocation = AuraCharacter->GetActorLocation();
+	const FVector Direction = (ImpactPoint - ActorLocation).GetSafeNormal();
 	// FRotator Rotation = (ImpactPoint-ActorLocation).Rotation();
-	FVector Forward(0.f,1.f,0.f);
-	FVector Right(1.f,0.f,0.f);
+	const FVector Forward(0.f,1.f,0.f);
+	const FVector Right(1.f,0.f,0.f);
 	
 	/*
 	AuraCharacter->SetActorRotation((ImpactPoint-ActorLocation).Rotation());
