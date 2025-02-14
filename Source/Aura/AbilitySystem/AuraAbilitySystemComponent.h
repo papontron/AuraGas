@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
 #include "AuraAbilitySystemComponent.generated.h"
-DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTag, FGameplayTagContainer)
+DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTagsSignature, FGameplayTagContainer)
 /**
  * 
  */
@@ -16,8 +16,15 @@ class AURA_API UAuraAbilitySystemComponent : public UAbilitySystemComponent
 public:
 	//this function will be called inmediately after the Ability actor info has been set
 	void AbilityActorInfoSet();
-	FEffectAssetTag EffectAssetTags;
+	FEffectAssetTagsSignature EffectAssetTagsDelegate;
+	void GrantAbilities(const TArray<TSubclassOf<UGameplayAbility>> &AbilitiesToGrant);
+
+	void AbilityInputTagHeld(const FGameplayTag &Tag);
+	void AbilityInputTagReleased(const FGameplayTag &Tag);
+	
 protected:
 	//this is function to be bind to the FOnGameplayEffectAppliedDelegate OnGameplayEffectAppliedDelegateToSelf delegate
-	void EffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& GameplayEffectSpec, FActiveGameplayEffectHandle ActiveGameplayEffectHandle);
+	//
+	UFUNCTION(Client, Reliable)
+	void ClientEffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& GameplayEffectSpec, FActiveGameplayEffectHandle ActiveGameplayEffectHandle);
 };

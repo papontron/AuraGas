@@ -32,7 +32,7 @@ class AURA_API UOverlayWidgetController : public UAuraWidgetController
 {
 	GENERATED_BODY()
 public:
-	virtual void BroadcastInitialValues() override;
+	virtual void BroadcastValues() override;
 	virtual void BindCallbacksToDependencies() override;
 	/* Delegates */
 	/* Primary Attributes Delegates */
@@ -45,18 +45,25 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Primary Attributes")
 	FOnAttributeChangedSignature OnVigorChanged;
 	/*End Primary Attributes Delegates*/
-	UPROPERTY(BlueprintAssignable, Category = "GAS|Vital Attributes")
-	FOnAttributeChangedSignature OnHealthChanged;
+	/*Secondary Attributes*/
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Vital Attributes")
 	FOnAttributeChangedSignature OnMaxHealthChanged;
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Vital Attributes")
-	FOnAttributeChangedSignature OnManaChanged;
-	UPROPERTY(BlueprintAssignable, Category = "GAS|Vital Attributes")
 	FOnAttributeChangedSignature OnMaxManaChanged;
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Vital Attributes")
-	FOnAttributeChangedSignature OnStaminaChanged;
-	UPROPERTY(BlueprintAssignable, Category = "GAS|Vital Attributes")
 	FOnAttributeChangedSignature OnMaxStaminaChanged;
+	/*End Secondary Attributes */
+
+	/*Vital Attributes*/
+	UPROPERTY(BlueprintAssignable, Category = "GAS|Vital Attributes")
+	FOnAttributeChangedSignature OnHealthChanged;
+	UPROPERTY(BlueprintAssignable, Category = "GAS|Vital Attributes")
+	FOnAttributeChangedSignature OnManaChanged;
+	UPROPERTY(BlueprintAssignable, Category = "GAS|Vital Attributes")
+	FOnAttributeChangedSignature OnStaminaChanged;
+	/*End Vital Attributes*/
+	
+	
 	UPROPERTY(BLueprintAssignable, Category = "GAS|Message Attributes")
 	FMessageWidgetSignature MessageWidgetRowDelegate;
 

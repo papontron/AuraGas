@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Aura/AbilitySystem/ModMagCal/MMC_MaxMana.h"
+#include "Aura/AbilitySystem/ModMagCal/SecondaryAttributesCalculation/MMC_MaxMana.h"
 #include "Aura/Interactive/CombatInterface.h"
 #include "Aura/AbilitySystem/AuraAttributeSet.h"
 

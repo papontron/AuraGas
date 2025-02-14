@@ -14,6 +14,7 @@ const UAuraAssetManager& UAuraAssetManager::Get()
 void UAuraAssetManager::StartInitialLoading()
 {
 	Super::StartInitialLoading();
+	//create all the gameplay tags that this game carries on (natively)
 	FAuraGameplayTags::InitializeNativeGameplayTags();
 	//Dont forget to set AssetManagerClassName=/Script/Aura.AuraAssetManager in the
 	//DefaultEngine config file under the[/Script/Engine.Engine] section

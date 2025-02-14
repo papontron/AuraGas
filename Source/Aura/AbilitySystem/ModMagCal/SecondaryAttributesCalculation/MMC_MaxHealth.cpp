@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Aura/AbilitySystem/ModMagCal/MMC_MaxHealth.h"
+#include "Aura/AbilitySystem/ModMagCal/SecondaryAttributesCalculation/MMC_MaxHealth.h"
 #include "Aura/AbilitySystem/AuraAttributeSet.h"
 #include "Aura/Interactive/CombatInterface.h"
 
@@ -29,6 +29,6 @@ float UMMC_MaxHealth::CalculateBaseMagnitude_Implementation(const FGameplayEffec
 	Vigor = FMath::Max<float>(Vigor,0.f);
 	ICombatInterface* CombatInterface = Cast<ICombatInterface>(Spec.GetContext().GetSourceObject());
 	const int32 CharacterLevel = CombatInterface->GetCharacterLevel();
-	
+	//each vigor points increases the character's max health by 4, and each level increases it by 20
 	return  80+4*Vigor+20*CharacterLevel;
 }

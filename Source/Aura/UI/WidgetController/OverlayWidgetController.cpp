@@ -6,9 +6,8 @@
 #include "AttributeSet.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 
-void UOverlayWidgetController::BroadcastInitialValues()
+void UOverlayWidgetController::BroadcastValues()
 {
-	Super::BroadcastInitialValues();
 	const UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>(AttributeSet);
 	/*Primary Attributes*/
 	OnStrengthChanged.Broadcast(AuraAttributeSet->GetStrength());
@@ -16,12 +15,16 @@ void UOverlayWidgetController::BroadcastInitialValues()
 	OnIntelligenceChanged.Broadcast(AuraAttributeSet->GetIntelligence());
 	OnVigorChanged.Broadcast(AuraAttributeSet->GetVigor());
 	/*End Primary Attributes*/
-	OnHealthChanged.Broadcast(AuraAttributeSet->GetHealth());
+	/*Secondary Attributes*/
 	OnMaxHealthChanged.Broadcast(AuraAttributeSet->GetMaxHealth());
-	OnManaChanged.Broadcast(AuraAttributeSet->GetMana());
 	OnMaxManaChanged.Broadcast(AuraAttributeSet->GetMaxMana());
-	OnStaminaChanged.Broadcast(AuraAttributeSet->GetStamina());
 	OnMaxStaminaChanged.Broadcast(AuraAttributeSet->GetMaxStamina());
+	/*End Secondary Attributes*/
+	/*Vital Attributes*/
+	OnHealthChanged.Broadcast(AuraAttributeSet->GetHealth());
+	OnManaChanged.Broadcast(AuraAttributeSet->GetMana());
+	OnStaminaChanged.Broadcast(AuraAttributeSet->GetStamina());
+	/*End Vital Attributes*/
 }
 
 void UOverlayWidgetController::BindCallbacksToDependencies()
@@ -64,12 +67,12 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 		OnMaxStaminaChanged.Broadcast(Data.NewValue);
 	});
 
-	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->EffectAssetTags.AddLambda([this](const FGameplayTagContainer &GameplayTagContainer)
+	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->EffectAssetTagsDelegate.AddLambda([this](const FGameplayTagContainer &GameplayTagContainer)
 	{
 		for (const FGameplayTag &Tag: GameplayTagContainer)
 		{
 			
-			GEngine->AddOnScreenDebugMessage(-1,10.f,FColor::Magenta,FString::Printf(TEXT("Tag: %s"),*Tag.ToString()));
+			// GEngine->AddOnScreenDebugMessage(-1,10.f,FColor::Magenta,FString::Printf(TEXT("Tag: %s"),*Tag.ToString()));
 			FGameplayTag Message = FGameplayTag::RequestGameplayTag(FName("Message"));
 			if (Tag.MatchesTag(Message))
 			{

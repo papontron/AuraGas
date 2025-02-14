@@ -29,7 +29,7 @@ AAuraCharacter::AAuraCharacter()
 	//Camera and spring arm
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
 	SpringArm->SetupAttachment(GetMesh());
-	SpringArm->TargetArmLength = 750.f;
+	SpringArm->TargetArmLength = 850.f;
 	SpringArm->SetUsingAbsoluteRotation(true);
 	SpringArm->bDoCollisionTest = false;
 	FTransform SpringArmTransform;
@@ -59,14 +59,39 @@ void AAuraCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 }
-
+//server
 void AAuraCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 	InitAbilityActorInfo();
 	InitAllAttributes();
+	GrantStartUpAbilities();
+	InitOverlay(NewController);
+}
+//client
+void AAuraCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+	InitAbilityActorInfo();
+	InitAllAttributes();
+	AController* CurrentController = GetController();
+	InitOverlay(CurrentController);
+}
+
+
+void AAuraCharacter::InitAbilityActorInfo()
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	checkf(AuraPlayerState,TEXT("Player state is null"));
+	AuraPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(AuraPlayerState,this);
+	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
+	AttributeSet = AuraPlayerState->GetAttributeSet();
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
-	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(NewController))
+}
+
+void AAuraCharacter::InitOverlay(AController* PlayerController) const
+{
+	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(PlayerController))
 	{
 		//since the player controller is only valid for the locally controlled pawn(multiplayer game)
 		AAuraPlayerState* AuraPlayerState = AuraPlayerController->GetPlayerState<AAuraPlayerState>();
@@ -79,20 +104,4 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 
 
 
-void AAuraCharacter::OnRep_PlayerState()
-{
-	Super::OnRep_PlayerState();
-	InitAbilityActorInfo();
-	InitAllAttributes();
-	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
-}
 
-
-void AAuraCharacter::InitAbilityActorInfo()
-{
-	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
-	checkf(AuraPlayerState,TEXT("Player state is null"));
-	AuraPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(AuraPlayerState,this);
-	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
-	AttributeSet = AuraPlayerState->GetAttributeSet();
-}

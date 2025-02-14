@@ -2,17 +2,24 @@
 
 
 #include "AuraPlayerController.h"
+#include "AbilitySystemBlueprintLibrary.h"
 #include "InputAction.h"
 #include "EnhancedInputSubsystems.h"
+#include "NavigationPath.h"
+#include "NavigationSystem.h"
+#include "Aura/AuraGameplayTags.h"
+#include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "EnhancedInputComponent.h"
-#include "Aura/Character/AuraCharacter.h"
+#include "Aura/Input/AuraInputComponent.h"
 #include "Aura/Interactive/EnemyInterface.h"
+#include "Components/SplineComponent.h"
+
 
 AAuraPlayerController::AAuraPlayerController()
 {
 	bReplicates = true;
+	SplineComponent = CreateDefaultSubobject<USplineComponent>("SplineComponent");
 }
 void AAuraPlayerController::BeginPlay()
 {
@@ -36,43 +43,45 @@ void AAuraPlayerController::BeginPlay()
 void AAuraPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
-	UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent);
+	checkf(AbilityInputTagDataAsset,TEXT("AbilityInputTagDataAsset is nullptr") );
+	UAuraInputComponent* AuraEnhancedInput = Cast<UAuraInputComponent>(InputComponent);
 	if (MoveAction)
 	{
-		EnhancedInput->BindAction(MoveAction,ETriggerEvent::Triggered,this, &AAuraPlayerController::HandleMove);	
-	}
-	if (MoveToClickAction)
-	{
-		EnhancedInput->BindAction(MoveToClickAction,ETriggerEvent::Triggered,this,&AAuraPlayerController::HandleMoveToClick);
-		
+		AuraEnhancedInput->BindAction(MoveAction,ETriggerEvent::Triggered,this, &AAuraPlayerController::HandleMove);	
 	}
 	if (SprintAction)
 	{
-		EnhancedInput->BindAction(SprintAction,ETriggerEvent::Started,this,&AAuraPlayerController::StartSprint);
-		EnhancedInput->BindAction(SprintAction,ETriggerEvent::Completed,this, &AAuraPlayerController::StopSprint );
+		AuraEnhancedInput->BindAction(SprintAction,ETriggerEvent::Started,this,&AAuraPlayerController::StartSprint);
+		AuraEnhancedInput->BindAction(SprintAction,ETriggerEvent::Completed,this, &AAuraPlayerController::StopSprint );
 	}
+	//Bind actions to the ability input actions from the data asset
+	AuraEnhancedInput->BindInputAbilityActions(AbilityInputTagDataAsset,this,&ThisClass::AbilityInputTagPressed,&AAuraPlayerController::AbilityInputTagReleased,&AAuraPlayerController::AbilityInputTagHeld);
 }
 
 void AAuraPlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	TraceCursor();
+	AutoRun();
 }
 
-/*void AAuraPlayerController::OnPossess(APawn* InPawn)
+
+void AAuraPlayerController::AutoRun()
 {
-	Super::OnPossess(InPawn);
-	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
-	checkf(AuraPlayerState,TEXT("No AuraPlayerState"));
-	
-	AAuraCharacter* AuraCharacter = Cast<AAuraCharacter>(InPawn);
-	
-	AuraPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(PlayerState,AuraCharacter);
-	AuraCharacter->SetAbilitySystemComponent(AuraPlayerState->GetAbilitySystemComponent());
-	AuraCharacter->SetAttributeSet(AuraPlayerState->GetAttributeSet());
-	
-	
-}*/
+	if (!bAutoRunning) return;
+	if (APawn* ControlledPawn = GetPawn())
+	{
+		const FVector LocationOnSpline = SplineComponent->FindLocationClosestToWorldLocation(ControlledPawn->GetActorLocation(),ESplineCoordinateSpace::World);
+		const FVector Direction = SplineComponent->FindDirectionClosestToWorldLocation(LocationOnSpline,ESplineCoordinateSpace::World);
+		ControlledPawn->AddMovementInput(Direction);
+		const float DistanceToDestination = (LocationOnSpline-CachedDestination).Length();
+		if (DistanceToDestination<=AutoRunAcceptanceRadius)
+		{	
+			bAutoRunning = false;
+		}
+	}
+}
+
 
 
 void AAuraPlayerController::HandleMove(const FInputActionValue& InputValue)
@@ -81,34 +90,41 @@ void AAuraPlayerController::HandleMove(const FInputActionValue& InputValue)
 	const FRotator Rotator(0.f,GetControlRotation().Yaw,0.f);
 	const FVector Forward = FRotationMatrix(Rotator).GetUnitAxis(EAxis::Y);
 	const FVector Right = FRotationMatrix(Rotator).GetUnitAxis(EAxis::X);
-
 	GetCharacter()->AddMovementInput(Forward, InputAxisVector.Y);
 	GetCharacter()->AddMovementInput(Right, InputAxisVector.X);
-	
-	
 }
 
 void AAuraPlayerController::HandleMoveToClick()
 {
-	AAuraCharacter* AuraCharacter = Cast<AAuraCharacter>(GetPawn());
-	FHitResult HitResult;
-	GetHitResultUnderCursor(ECC_Visibility,true,HitResult);
-	if (!HitResult.bBlockingHit) return;
-	
-	const FVector ImpactPoint = HitResult.ImpactPoint;
-	const FVector ActorLocation = AuraCharacter->GetActorLocation();
-	const FVector Direction = (ImpactPoint - ActorLocation).GetSafeNormal();
-	// FRotator Rotation = (ImpactPoint-ActorLocation).Rotation();
-	const FVector Forward(0.f,1.f,0.f);
-	const FVector Right(1.f,0.f,0.f);
-	
-	/*
-	AuraCharacter->SetActorRotation((ImpactPoint-ActorLocation).Rotation());
-	AuraCharacter->GetCharacterMovement()->Velocity = Direction*AuraCharacter->GetCharacterMovement()->MaxWalkSpeed;
-	GEngine->AddOnScreenDebugMessage(-1,5.f,FColor::Magenta,FString::Printf(TEXT("Current velocity: %f"),AuraCharacter->GetCharacterMovement()->Velocity.Length()));*/
+	//this requires the right mouse button to be pressed to get the actor moved to the destination(bit by bit)
+	FollowTime += GetWorld()->GetDeltaSeconds();
+	APawn* ControlledPawn = GetPawn();
+	if (CursorHit.bBlockingHit)
+	{
+		CachedDestination = CursorHit.ImpactPoint;
+		const FVector Direction = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
+		ControlledPawn->AddMovementInput(Direction);
+	}
+}
 
-	AuraCharacter->AddMovementInput(Forward,Direction.Y);
-	AuraCharacter->AddMovementInput(Right,Direction.X);
+void AAuraPlayerController::HandleNavigateToDestination()
+{
+	//dont forgot to check Allow client navigation in the project settings / navigation system
+	if (APawn* ControlledPawn = GetPawn())
+	{
+		UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(this,ControlledPawn->GetActorLocation(),CachedDestination);
+		SplineComponent->ClearSplinePoints();
+		for (FVector &VectorPoint: NavPath->PathPoints)
+		{
+			SplineComponent->AddSplinePoint(VectorPoint,ESplineCoordinateSpace::World);
+			DrawDebugSphere(GetWorld(),VectorPoint,10.f, 16,FColor::Emerald,false,5.f);
+		}
+		
+		//switched the destination to the last point of the spline, so that it can be reachable
+		CachedDestination = NavPath->PathPoints.Last();
+		//this will trigger the auto run in the event tick
+		bAutoRunning = true;
+	}
 }
 
 void AAuraPlayerController::StartSprint()
@@ -121,13 +137,70 @@ void AAuraPlayerController::StopSprint()
 	GetCharacter()->GetCharacterMovement()->MaxWalkSpeed = 320.f;
 }
 
+void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag Tag)
+{
+	if (!GetAbilitySystemComponent()) return;
+	if (Tag.MatchesTagExact(FAuraGameplayTags::Get().Input_Ability_RMB))
+	{
+		bTargeting = ThisActor?true:false;
+		//always reset auto running when an ability input is pressed 
+		bAutoRunning = false;
+	}
+	//GEngine->AddOnScreenDebugMessage(1,5.f,FColor::Red,FString::Printf(TEXT("Ability Tag Pressed:%s"),*Tag.ToString()));
+}
+
+void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag Tag)
+{
+	if (!GetAbilitySystemComponent()) return;
+	if (!Tag.MatchesTagExact(FAuraGameplayTags::Get().Input_Ability_RMB))
+	{
+		GetAbilitySystemComponent()->AbilityInputTagReleased(Tag);
+		return;
+	}
+	if (bTargeting)
+	{
+		//if there is a target under the cursor hit, then release the ability
+		GetAbilitySystemComponent()->AbilityInputTagReleased(Tag);
+	}else
+	{
+		if (FollowTime<=ShortPressThreshold)
+		{
+			HandleNavigateToDestination();
+		}
+		FollowTime = 0;
+		bTargeting = false;
+	}
+	//GEngine->AddOnScreenDebugMessage(2,5.f,FColor::Blue,FString::Printf(TEXT("Ability Tag Released:%s"),*Tag.ToString()));
+}
+
+void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag Tag)
+{
+	if (!GetAbilitySystemComponent()) return;
+	
+	if (!Tag.MatchesTagExact(FAuraGameplayTags::Get().Input_Ability_RMB))
+	{
+		GetAbilitySystemComponent()->AbilityInputTagHeld(Tag);
+		return;
+	}
+	if (bTargeting)
+	{
+		//if there is a target under the cursor hit
+		GetAbilitySystemComponent()->AbilityInputTagHeld(Tag);
+	}else
+	{
+		//MoveToClick behavior
+		HandleMoveToClick();
+	}
+	//GEngine->AddOnScreenDebugMessage(3,5.f,FColor::Green,FString::Printf(TEXT("Ability Tag Held:%s"),*Tag.ToString()));
+}
+
 void AAuraPlayerController::TraceCursor()
 {
-	FHitResult HitResult;
-	GetHitResultUnderCursor(ECC_Visibility,true,HitResult);
-	if (!HitResult.bBlockingHit) return;
+	
+	GetHitResultUnderCursor(ECC_Visibility,true,CursorHit);
+	if (!CursorHit.bBlockingHit) return;
 	LastActor = ThisActor;
-	ThisActor = HitResult.GetActor();
+	ThisActor = CursorHit.GetActor();
 	/*Case 1:
 	 *ThisActor exists and lastActor = nullptr:
 	 *	HighLight thisActor
@@ -168,4 +241,13 @@ void AAuraPlayerController::TraceCursor()
 			LastActor->HighlightUnhighlight();
 		}
 	}
+}
+
+UAuraAbilitySystemComponent* AAuraPlayerController::GetAbilitySystemComponent()
+{
+	if (AuraAbilitySystemComponent == nullptr)
+	{
+		AuraAbilitySystemComponent = Cast<UAuraAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>()));
+	}
+	return AuraAbilitySystemComponent;
 }

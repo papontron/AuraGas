@@ -9,6 +9,7 @@
 #include "AuraCharacterBase.generated.h"
 
 
+class UGameplayAbility;
 class UGameplayEffect;
 class USpringArmComponent;
 class UAbilitySystemComponent;
@@ -59,8 +60,22 @@ protected:
 	void InitSecondaryAttributes() const;
 	UFUNCTION()
 	void InitVitalAttributes() const;
+
+	//grants the start up character's abilities
+	void GrantStartUpAbilities() const;
+
+	UPROPERTY(EditAnywhere,Category="Setup")
+	FName WeaponTipSocketName;
+
+	virtual FVector GetCombatSocketLocation() const override;
 private:
+	
 	void ApplyEffectToSelf(const TSubclassOf<UGameplayEffect> &GameplayEffectClass,const float ActorLevel) const;
+	
+	UPROPERTY(EditAnywhere, Category="Abilities/StartUp", meta=(AllowPrivateAccess=true))
+	TArray<TSubclassOf<UGameplayAbility>> StartUpAbilities;
+
+	
 };
 
  

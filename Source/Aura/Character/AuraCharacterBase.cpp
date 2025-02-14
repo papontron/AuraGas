@@ -4,6 +4,9 @@
 #include "AuraCharacterBase.h"
 
 #include "AbilitySystemComponent.h"
+#include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
+#include "Aura/UI/HUD/AuraHUD.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AAuraCharacterBase::AAuraCharacterBase()
@@ -65,8 +68,6 @@ void AAuraCharacterBase::InitPrimaryAttributes() const
 	ApplyEffectToSelf(DefaultPrimaryAttributes,1.f);
 }
 
-
-
 void AAuraCharacterBase::InitSecondaryAttributes() const
 {
 	ApplyEffectToSelf(DefaultSecondaryAttributes,1.f);
@@ -75,6 +76,12 @@ void AAuraCharacterBase::InitSecondaryAttributes() const
 void AAuraCharacterBase::InitVitalAttributes() const
 {
 	ApplyEffectToSelf(DefaultVitalAttributes,1.f);
+}
+
+void AAuraCharacterBase::GrantStartUpAbilities() const
+{
+	if (!HasAuthority()) return;
+	CastChecked<UAuraAbilitySystemComponent>(AbilitySystemComponent)->GrantAbilities(StartUpAbilities);
 }
 
 void AAuraCharacterBase::ApplyEffectToSelf(const TSubclassOf<UGameplayEffect> &GameplayEffectClass,const float ActorLevel) const
@@ -87,3 +94,9 @@ void AAuraCharacterBase::ApplyEffectToSelf(const TSubclassOf<UGameplayEffect> &G
 	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 }
 
+
+FVector AAuraCharacterBase::GetCombatSocketLocation() const
+{
+	checkf(Weapon, TEXT("This character doesn't have a weapon"))
+	return Weapon->GetSocketLocation(WeaponTipSocketName);
+}

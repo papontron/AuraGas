@@ -41,20 +41,29 @@ struct FAuraGameplayTags
 	FGameplayTag Attribute_Vital_Stamina;
 	//Derived Attributes Tags
 	FGameplayTag Attribute_Derived_BlockChance;
-	FGameplayTag Attribute_Derived_IgnoreArmorChance;
-	FGameplayTag Attribute_Derived_CriticalDamageChance;
-	FGameplayTag Attribute_Derived_ExcellentDamageChance;
-	FGameplayTag Attribute_Derived_CriticalDamage;
-	FGameplayTag Attribute_Derived_ExcellentDamage;
-	FGameplayTag Attribute_Derived_StunChance;
-	FGameplayTag Attribute_Derived_DoubleDamageChance;
-	FGameplayTag Attribute_Derived_TripleDamageChance;
+	FGameplayTag Attribute_Derived_IgnoreArmorHitChance;
+	FGameplayTag Attribute_Derived_IgnoreArmorHitResistance;
+	FGameplayTag Attribute_Derived_CriticalHitChance;
+	FGameplayTag Attribute_Derived_ExcellentHitChance;
+	FGameplayTag Attribute_Derived_CriticalHitDamage;
+	FGameplayTag Attribute_Derived_ExcellentHitDamage;
+	FGameplayTag Attribute_Derived_StunHitChance;
+	FGameplayTag Attribute_Derived_StunHitResistance;
+	FGameplayTag Attribute_Derived_DoubleDamageHitChance;
+	FGameplayTag Attribute_Derived_TripleDamageHitChance;
 	FGameplayTag Attribute_Derived_FreezeDebuff;
 	FGameplayTag Attribute_Derived_BurnDebuff;
 	FGameplayTag Attribute_Derived_PoisonDebuff;
 	FGameplayTag Attribute_Derived_FreezeChance;
 	FGameplayTag Attribute_Derived_BurnChance;
 	FGameplayTag Attribute_Derived_PoisonChance;
+	FGameplayTag Attribute_Derived_CriticalHitResistance;
+	FGameplayTag Attribute_Derived_ExcellentHitResistance;
+	FGameplayTag Attribute_Derived_DoubleDamageHitResistance;
+	FGameplayTag Attribute_Derived_TripleDamageHitResistance;
+	FGameplayTag Attribute_Derived_FreezeResistance;
+	FGameplayTag Attribute_Derived_BurnResistance;
+	FGameplayTag Attribute_Derived_PoisonResistance;
 	//MessageTags
 	FGameplayTag Message_HealthPotion;
 	FGameplayTag Message_ManaPotion;
@@ -62,12 +71,21 @@ struct FAuraGameplayTags
 	FGameplayTag Message_HealthCrystal;
 	FGameplayTag Message_ManaCrystal;
 	FGameplayTag Message_StaminaCrystal;
+	//Ability inputs
+	FGameplayTag Input_Ability_LMB;
+	FGameplayTag Input_Ability_RMB;
+	FGameplayTag Input_Ability_CMB;
+	FGameplayTag Input_Ability_1;
+	FGameplayTag Input_Ability_2;
+	FGameplayTag Input_Ability_3;
+	FGameplayTag Input_Ability_4;
 protected:
-	void InitPrimaryAttributesTags();
-	void InitSecondaryAttributesTags();
-	void InitDerivedAttributesTags();
-	void InitVitalAttributesTags();
-	void InitMessageTags();
+	void InitPrimaryAttributesTags(UGameplayTagsManager &GameplayTagsManager);
+	void InitSecondaryAttributesTags(UGameplayTagsManager &GameplayTagsManager);
+	void InitDerivedAttributesTags(UGameplayTagsManager &GameplayTagsManager);
+	void InitVitalAttributesTags(UGameplayTagsManager &GameplayTagsManager);
+	void InitMessageTags(UGameplayTagsManager &GameplayTagsManager);
+	void InitAbilityInputTags(UGameplayTagsManager &GameplayTagsManager);
 private:
 	static FAuraGameplayTags GameplayTags;
 };

@@ -30,4 +30,8 @@ protected:
 	TObjectPtr<UCameraComponent> Camera;
 	UPROPERTY(EditAnywhere,Category="Setup")
 	TObjectPtr<USpringArmComponent> SpringArm;
+
+	void InitOverlay(AController* PlayerController) const;
+
+	
 };
